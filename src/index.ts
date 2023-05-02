@@ -1,11 +1,11 @@
-import { TObject } from "@sinclair/typebox";
+import { TSchema } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { CastingContext, parse } from "csv-parse";
 import type { Callback, Parser } from "csv-parse/dist/cjs/index.d.cts";
 import { TypeCompiler, TypeCheck } from "@sinclair/typebox/compiler";
 
 
-const onRecord = <T extends TObject>(
+const onRecord = <T extends TSchema>(
   schema: T,
   recordType: TypeCheck<T>,
   record: {},
@@ -26,7 +26,7 @@ const onRecord = <T extends TObject>(
 
   return parsedRecord;
 };
-function typeboxParse<T extends TObject>(
+function typeboxParse<T extends TSchema>(
   schema: T,
   input: Buffer | string,
   callback?: Callback
