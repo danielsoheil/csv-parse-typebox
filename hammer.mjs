@@ -17,6 +17,6 @@ export async function build(target = "dist") {
 export async function publish(target = "dist") {
   const { version } = JSON.parse(readFileSync("package.json", "utf8"));
   await shell(
-    `cd ${target} && npm publish erfanium-fetch-typebox-${version}.tgz --access=public`
+    `cd ${target} && npm publish danielsoheil-csv-parse-typebox-${version}.tgz --access=public`
   );
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@erfanium/fetch-typebox",
+  "name": "@danielsoheil/csv-parse-typebox",
   "version": "0.2.2",
   "description": "",
   "main": "index.js",
@@ -10,15 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/erfanium/fetch-typebox.git"
+    "url": "git+https://github.com/danielsoheil/csv-parse-typebox.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/erfanium/fetch-typebox/issues"
+    "url": "https://github.com/danielsoheil/csv-parse-typebox/issues"
   },
-  "homepage": "https://github.com/erfanium/fetch-typebox#readme",
+  "homepage": "https://github.com/danielsoheil/csv-parse-typebox#readme",
   "devDependencies": {
     "@sinclair/hammer": "^0.17.2",
     "@sinclair/typebox": "^0.28.7",
@@ -27,5 +27,8 @@
   },
   "peerDependencies": {
     "@sinclair/typebox": ">=0.28.0"
+  },
+  "dependencies": {
+    "csv-parse": "^5.3.9"
   }
 }

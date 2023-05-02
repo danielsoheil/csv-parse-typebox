@@ -1,45 +1,42 @@
-import { Static, TSchema, TUnknown } from "@sinclair/typebox";
-import { TypeCheck } from "@sinclair/typebox/compiler";
+import { TObject } from "@sinclair/typebox";
+import { Value } from "@sinclair/typebox/value";
+import { CastingContext, parse } from "csv-parse";
+import type { Callback, Parser } from "csv-parse/dist/cjs/index.d.cts";
 
-export class ResponseValidationError extends Error {}
-
-export class TypeBoxResponse extends Response {
-  constructor(response: Response) {
-    super(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-    });
+const onRecord = <T extends TObject>(
+  schema: T,
+  record: {},
+  context: CastingContext
+) => {
+  // ignore header
+  for (const index in Object.keys(record)) {
+    if (Object.keys(record)[index] === Object.values(record)[index]) return;
   }
 
-  json(): Promise<unknown>;
-  json<T extends TSchema>(typeChecker: TypeCheck<T>): Promise<Static<T>>;
-  async json<T extends TSchema = TUnknown>(
-    typeChecker?: TypeCheck<T>
-  ): Promise<Static<T>> {
-    if (!typeChecker) return super.json();
-    const body = await super.json();
-    const result = typeChecker.Check(body);
-    if (result) return body;
+  // parse record
+  const parsedRecord = Value.Convert(schema, record);
 
-    const errors = typeChecker.Errors(body);
-    const firstError = errors.First();
-
-    throw new ResponseValidationError(
-      `ResponseValidationError ${firstError?.message}. path: ${firstError?.path} value: ${firstError?.value}`,
-      {
-        cause: firstError,
-      }
-    );
+  // validate record
+  if (!Value.Check(schema, parsedRecord)) {
+    throw new Error("cannot validate this record");
   }
+
+  return parsedRecord;
+};
+function typeboxParse<T extends TObject>(
+  schema: T,
+  input: Buffer | string,
+  callback?: Callback
+): Parser {
+  return parse(
+    input,
+    {
+      delimiter: ",",
+      columns: Object.keys(schema.properties),
+      onRecord: (record, context) => onRecord(schema, record, context),
+    },
+    callback
+  );
 }
 
-async function typeboxFetch(
-  input: RequestInfo,
-  init?: RequestInit
-): Promise<TypeBoxResponse> {
-  const response = await fetch(input, init);
-  return new TypeBoxResponse(response);
-}
-
-export { typeboxFetch as fetch, TypeBoxResponse as Response };
+export { typeboxParse as parse };
