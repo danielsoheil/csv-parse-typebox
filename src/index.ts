@@ -2,9 +2,12 @@ import { TObject } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { CastingContext, parse } from "csv-parse";
 import type { Callback, Parser } from "csv-parse/dist/cjs/index.d.cts";
+import { TypeCompiler, TypeCheck } from "@sinclair/typebox/compiler";
+
 
 const onRecord = <T extends TObject>(
   schema: T,
+  recordType: TypeCheck<T>,
   record: {},
   context: CastingContext
 ) => {
@@ -17,7 +20,7 @@ const onRecord = <T extends TObject>(
   const parsedRecord = Value.Convert(schema, record);
 
   // validate record
-  if (!Value.Check(schema, parsedRecord)) {
+  if (!recordType.Check(parsedRecord)) {
     throw new Error("cannot validate this record");
   }
 
@@ -28,12 +31,13 @@ function typeboxParse<T extends TObject>(
   input: Buffer | string,
   callback?: Callback
 ): Parser {
+  const RecordType = TypeCompiler.Compile(schema);
   return parse(
     input,
     {
       delimiter: ",",
       columns: Object.keys(schema.properties),
-      onRecord: (record, context) => onRecord(schema, record, context),
+      onRecord: (record, context) => onRecord(schema, RecordType, record, context),
     },
     callback
   );
