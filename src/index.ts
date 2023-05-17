@@ -1,13 +1,11 @@
 import { TSchema } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { CastingContext, parse } from "csv-parse";
-import type { Callback, Parser } from "csv-parse/dist/cjs/index.d.cts";
 import { TypeCompiler, TypeCheck } from "@sinclair/typebox/compiler";
 
-
 const onRecord = <T extends TSchema>(
-  schema: T,
-  recordType: TypeCheck<T>,
+  recordSchema: T,
+  recordSchemaCompiled: TypeCheck<T>,
   record: {},
   context: CastingContext
 ) => {
@@ -17,30 +15,39 @@ const onRecord = <T extends TSchema>(
   }
 
   // parse record
-  const parsedRecord = Value.Convert(schema, record);
+  const parsedRecord = Value.Convert(recordSchema, record);
 
   // validate record
-  if (!recordType.Check(parsedRecord)) {
+  if (!recordSchemaCompiled.Check(parsedRecord)) {
     throw new Error("cannot validate this record");
   }
 
   return parsedRecord;
 };
+
 function typeboxParse<T extends TSchema>(
-  schema: T,
   input: Buffer | string,
-  callback?: Callback
-): Parser {
-  const RecordType = TypeCompiler.Compile(schema);
-  return parse(
-    input,
-    {
-      delimiter: ",",
-      columns: Object.keys(schema.properties),
-      onRecord: (record, context) => onRecord(schema, RecordType, record, context),
-    },
-    callback
-  );
+  recordSchema: T,
+  recordSchemaCompiled: TypeCheck<T> = TypeCompiler.Compile(recordSchema)
+): Promise<[]> {
+  return new Promise((resolve, reject) => {
+    parse(
+      input,
+      {
+        delimiter: ",",
+        columns: Object.keys(recordSchema.properties),
+        onRecord: (record, context) =>
+          onRecord(recordSchema, recordSchemaCompiled, record, context),
+      },
+      (error, records) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(records);
+        }
+      }
+    );
+  });
 }
 
 export { typeboxParse as parse };

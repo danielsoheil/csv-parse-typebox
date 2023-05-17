@@ -1,6 +1,6 @@
 {
   "name": "@danielsoheil/csv-parse-typebox",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "",
   "main": "index.js",
   "types": "index.d.ts",
