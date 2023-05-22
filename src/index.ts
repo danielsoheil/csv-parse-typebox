@@ -1,4 +1,4 @@
-import { TSchema } from "@sinclair/typebox";
+import {Static, TSchema} from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { CastingContext, parse } from "csv-parse";
 import { TypeCompiler, TypeCheck } from "@sinclair/typebox/compiler";
@@ -29,7 +29,7 @@ function typeboxParse<T extends TSchema>(
   input: Buffer | string,
   recordSchema: T,
   recordSchemaCompiled: TypeCheck<T> = TypeCompiler.Compile(recordSchema)
-): Promise<T[]> {
+): Promise<Static<T>[]> {
   return new Promise((resolve, reject) => {
     parse(
       input,
