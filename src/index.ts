@@ -29,7 +29,7 @@ function typeboxParse<T extends TSchema>(
   input: Buffer | string,
   recordSchema: T,
   recordSchemaCompiled: TypeCheck<T> = TypeCompiler.Compile(recordSchema)
-): Promise<[]> {
+): Promise<T[]> {
   return new Promise((resolve, reject) => {
     parse(
       input,
