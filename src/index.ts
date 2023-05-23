@@ -1,11 +1,12 @@
-import {Static, TSchema} from "@sinclair/typebox";
-import { Value } from "@sinclair/typebox/value";
+import { Static, TSchema } from "@sinclair/typebox";
 import { CastingContext, parse } from "csv-parse";
-import { TypeCompiler, TypeCheck } from "@sinclair/typebox/compiler";
+import Ajv from "ajv";
+import { ValidateFunction } from "ajv/lib/types";
+const ajv = new Ajv({ coerceTypes: true });
 
 const onRecord = <T extends TSchema>(
   recordSchema: T,
-  recordSchemaCompiled: TypeCheck<T>,
+  recordValidateFunction: ValidateFunction<T>,
   record: {},
   context: CastingContext
 ) => {
@@ -14,21 +15,18 @@ const onRecord = <T extends TSchema>(
     if (Object.keys(record)[index] === Object.values(record)[index]) return;
   }
 
-  // parse record
-  const parsedRecord = Value.Convert(recordSchema, record);
-
   // validate record
-  if (!recordSchemaCompiled.Check(parsedRecord)) {
+  if (!recordValidateFunction(record)) {
     throw new Error("cannot validate this record");
   }
 
-  return parsedRecord;
+  return record;
 };
 
 function typeboxParse<T extends TSchema>(
   input: Buffer | string,
   recordSchema: T,
-  recordSchemaCompiled: TypeCheck<T> = TypeCompiler.Compile(recordSchema)
+  recordValidateFunction: ValidateFunction<T> = ajv.compile(recordSchema)
 ): Promise<Static<T>[]> {
   return new Promise((resolve, reject) => {
     parse(
@@ -37,7 +35,7 @@ function typeboxParse<T extends TSchema>(
         delimiter: ",",
         columns: Object.keys(recordSchema.properties),
         onRecord: (record, context) =>
-          onRecord(recordSchema, recordSchemaCompiled, record, context),
+          onRecord(recordSchema, recordValidateFunction, record, context),
       },
       (error, records) => {
         if (error) {
