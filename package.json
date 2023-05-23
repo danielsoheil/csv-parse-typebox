@@ -1,6 +1,6 @@
 {
   "name": "@danielsoheil/csv-parse-typebox",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "description": "",
   "main": "index.js",
   "types": "index.d.ts",
@@ -26,9 +26,7 @@
     "typescript": "^5.0.4"
   },
   "peerDependencies": {
-    "@sinclair/typebox": "^0.28.9"
-  },
-  "dependencies": {
+    "@sinclair/typebox": "^0.28.9",
     "ajv": "^6.12.4",
     "csv-parse": "^5.3.9"
   }
