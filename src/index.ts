@@ -1,12 +1,11 @@
 import { Static, TSchema } from "@sinclair/typebox";
 import { CastingContext, parse } from "csv-parse";
-import Ajv from "ajv";
-import { ValidateFunction } from "ajv/lib/types";
+import Ajv, { ValidateFunction } from "ajv";
 const ajv = new Ajv({ coerceTypes: true });
 
 const onRecord = <T extends TSchema>(
   recordSchema: T,
-  recordValidateFunction: ValidateFunction<T>,
+  recordValidateFunction: ValidateFunction,
   record: {},
   context: CastingContext
 ) => {
@@ -26,7 +25,7 @@ const onRecord = <T extends TSchema>(
 function typeboxParse<T extends TSchema>(
   input: Buffer | string,
   recordSchema: T,
-  recordValidateFunction: ValidateFunction<T> = ajv.compile(recordSchema)
+  recordValidateFunction: ValidateFunction = ajv.compile(recordSchema)
 ): Promise<Static<T>[]> {
   return new Promise((resolve, reject) => {
     parse(
